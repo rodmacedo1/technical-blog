@@ -1,0 +1,65 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+
+const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+const links = [
+	{
+		name: "LinkedIn",
+		href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+	},
+	{
+		name: "Hacker News",
+		href: `https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`,
+	},
+	{
+		name: "Reddit",
+		href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+	},
+	{
+		name: "Bluesky",
+		href: `https://bsky.app/intent/compose?text=${encodeURIComponent(title + " " + url)}`,
+	},
+];
+---
+
+<nav aria-label="Share article" class="mt-10">
+	<h2 class="mb-4 font-semibold">Share this article</h2>
+
+	<div class="flex flex-wrap gap-3">
+		{links.map((link) => (
+			<a
+				href={link.href}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="rounded border px-3 py-2 text-sm"
+			>
+				{link.name}
+			</a>
+		))}
+
+		<button type="button" data-copy-link class="rounded border px-3 py-2 text-sm">
+			Copy link
+		</button>
+	</div>
+</nav>
+
+<script>
+	document.querySelectorAll<HTMLButtonElement>("[data-copy-link]").forEach((button) => {
+		button.addEventListener("click", async () => {
+			try {
+				await navigator.clipboard.writeText(window.location.href);
+				button.textContent = "Copied!";
+			} catch {
+				button.textContent = "Unable to copy";
+			}
+		});
+	});
+</script>
